@@ -7,6 +7,34 @@ import { TypingTest } from "@/components/typing/typing-test";
 import { Keyboard } from "@/components/ui/keyboard";
 import { cn } from "@/lib/utils";
 
+function keyCodeToChar(code: string): string | null {
+  if (code.startsWith("Key")) {
+    return code.slice(3).toLowerCase();
+  }
+  if (code.startsWith("Digit")) {
+    return code.slice(5);
+  }
+
+  const map: Record<string, string> = {
+    Space: " ",
+    Comma: ",",
+    Period: ".",
+    Slash: "/",
+    Semicolon: ";",
+    Quote: "'",
+    Minus: "-",
+    Equal: "=",
+    BracketLeft: "[",
+    BracketRight: "]",
+    Backslash: "\\",
+    Backquote: "`",
+    Backspace: "Backspace",
+    Enter: "Enter",
+  };
+
+  return map[code] ?? null;
+}
+
 export default function Page() {
   const { settingsOpen, setTypingActive, homeLogoHandlerRef } = useAppChrome();
   const [isFinished, setIsFinished] = useState(false);
@@ -72,6 +100,23 @@ export default function Page() {
               physicalKeysEnabled={typingFocused}
               theme={accent}
               volume={soundVolume}
+              onKeyEvent={(event) => {
+                if (event.phase === "down" && event.source === "pointer") {
+                  const inputEl = document.querySelector("input.absolute.opacity-0") as HTMLInputElement;
+                  if (inputEl) {
+                    const char = keyCodeToChar(event.code);
+                    if (char) {
+                      const keydownEvent = new KeyboardEvent("keydown", {
+                        key: char,
+                        code: event.code,
+                        bubbles: true,
+                        cancelable: true,
+                      });
+                      inputEl.dispatchEvent(keydownEvent);
+                    }
+                  }
+                }
+              }}
             />
           </div>
           <p className="text-muted-foreground/40 text-xs">
