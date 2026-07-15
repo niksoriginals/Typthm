@@ -48,142 +48,197 @@ export function ShareCardPopover({ stats }: { stats: ResultStats }) {
   useEffect(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 800;
-    canvas.height = 420;
+    canvas.height = 450;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // 1. Base dark background
-    ctx.fillStyle = "#09090b";
-    ctx.fillRect(0, 0, 800, 420);
+    // 1. Dark background canvas base
+    ctx.fillStyle = "#0c0c0e";
+    ctx.fillRect(0, 0, 800, 450);
 
-    // 2. Map theme accent colors to radial glow
+    // 2. Map theme accent colors to modern glow mesh
     const activeAccent = localStorage.getItem("tc-accent") || "aurora";
-    let glowColor1 = "#312E81";
-    let glowColor2 = "#06B6D4";
+    let color1 = "#6366f1"; // primary / indigo
+    let color2 = "#06b6d4"; // secondary / cyan
+    let color3 = "#ec4899"; // pink highlight
 
     if (activeAccent === "classic") {
-      glowColor1 = "#737373";
-      glowColor2 = "#F57644";
+      color1 = "#4b5563"; // gray-600
+      color2 = "#f97316"; // orange-500
+      color3 = "#a855f7"; // purple-500
     } else if (activeAccent === "mint") {
-      glowColor1 = "#447B82";
-      glowColor2 = "#86C8AC";
+      color1 = "#115e59"; // teal-800
+      color2 = "#10b981"; // emerald-500
+      color3 = "#3b82f6"; // blue-500
     } else if (activeAccent === "royal") {
-      glowColor1 = "#324974";
-      glowColor2 = "#E4D440";
+      color1 = "#1d4ed8"; // blue-700
+      color2 = "#eab308"; // yellow-500
+      color3 = "#ec4899"; // pink-500
     } else if (activeAccent === "dolch") {
-      glowColor1 = "#3E3B4C";
-      glowColor2 = "#D73E42";
+      color1 = "#1f2937"; // gray-800
+      color2 = "#ef4444"; // red-500
+      color3 = "#f43f5e"; // rose-500
     } else if (activeAccent === "sand") {
-      glowColor1 = "#893D36";
-      glowColor2 = "#C94E41";
+      color1 = "#7c2d12"; // orange-900
+      color2 = "#ea580c"; // orange-600
+      color3 = "#facc15"; // yellow-400
     } else if (activeAccent === "scarlet") {
-      glowColor1 = "#D5868A";
-      glowColor2 = "#8F4246";
+      color1 = "#9f1239"; // rose-800
+      color2 = "#be123c"; // rose-700
+      color3 = "#f43f5e"; // rose-500
     }
 
-    // Left radial glow (dark base theme glow)
-    const leftGlow = ctx.createRadialGradient(150, 210, 50, 150, 210, 300);
-    leftGlow.addColorStop(0, hexToRgba(glowColor1, 0.35));
+    // Left organic glow
+    const leftGlow = ctx.createRadialGradient(100, 400, 50, 100, 400, 500);
+    leftGlow.addColorStop(0, hexToRgba(color1, 0.22));
     leftGlow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = leftGlow;
-    ctx.fillRect(0, 0, 800, 420);
+    ctx.fillRect(0, 0, 800, 450);
 
-    // Right radial glow (accent highlights)
-    const rightGlow = ctx.createRadialGradient(650, 210, 50, 650, 210, 300);
-    rightGlow.addColorStop(0, hexToRgba(glowColor2, 0.3));
+    // Right organic glow
+    const rightGlow = ctx.createRadialGradient(700, 50, 50, 700, 50, 450);
+    rightGlow.addColorStop(0, hexToRgba(color2, 0.22));
     rightGlow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = rightGlow;
-    ctx.fillRect(0, 0, 800, 420);
+    ctx.fillRect(0, 0, 800, 450);
 
-    // 3. Draw glass border
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    // Center auxiliary glow
+    const centerGlow = ctx.createRadialGradient(550, 250, 30, 550, 250, 350);
+    centerGlow.addColorStop(0, hexToRgba(color3, 0.14));
+    centerGlow.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = centerGlow;
+    ctx.fillRect(0, 0, 800, 450);
+
+    // 3. Drop Shadow for the card plate
+    ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 15;
+
+    // Solid Glassmorphic Card Container
+    ctx.fillStyle = "rgba(12, 12, 16, 0.65)";
+    drawRoundedRect(ctx, 40, 40, 720, 370, 24);
+    ctx.fill();
+
+    // Reset shadow so it doesn't affect subsequent text or borders
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // 4. Double-layered premium glass border
+    const cardBorder = ctx.createLinearGradient(40, 40, 760, 410);
+    cardBorder.addColorStop(0, "rgba(255, 255, 255, 0.16)");
+    cardBorder.addColorStop(0.3, "rgba(255, 255, 255, 0.02)");
+    cardBorder.addColorStop(0.7, "rgba(255, 255, 255, 0.01)");
+    cardBorder.addColorStop(1, "rgba(255, 255, 255, 0.08)");
+    ctx.strokeStyle = cardBorder;
     ctx.lineWidth = 1.5;
-    drawRoundedRect(ctx, 20, 20, 760, 380, 20);
+    drawRoundedRect(ctx, 40, 40, 720, 370, 24);
     ctx.stroke();
 
-    // 4. Logo & brand heading
-    ctx.fillStyle = glowColor2;
-    drawRoundedRect(ctx, 45, 45, 24, 24, 6);
+    // 5. Apple-style brand header
+    // Glowing gradient circle icon badge
+    const logoGrad = ctx.createLinearGradient(60, 60, 90, 90);
+    logoGrad.addColorStop(0, color2);
+    logoGrad.addColorStop(1, color1);
+    ctx.fillStyle = logoGrad;
+    ctx.beginPath();
+    ctx.arc(75, 75, 14, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 13px system-ui, -apple-system, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("T", 57, 61);
 
+    // Inner letter "T"
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 20px system-ui, -apple-system, sans-serif";
+    ctx.font = "bold 15px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("T", 75, 74.5);
+
+    // Title
     ctx.textAlign = "left";
-    ctx.fillText("Typthm", 80, 63);
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 20px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("Typthm", 102, 82);
 
+    // Subtitle
     ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-    ctx.font = "normal 12px system-ui, -apple-system, sans-serif";
-    ctx.fillText("mechanical keyboard typing test", 165, 62);
+    ctx.font = "400 11px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("· designed by niksoriginals", 182, 81);
 
-    // 5. Main WPM & Accuracy figures
+    // Right aligned URL watermark
+    ctx.textAlign = "right";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+    ctx.font = "500 12px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("typthm.niksoriginals.in", 725, 81);
+
+    // 6. Huge stats columns (WPM / Accuracy)
     // WPM
-    ctx.fillStyle = glowColor2;
-    ctx.font = "bold 100px Courier New, Courier, monospace";
+    const wpmTextGrad = ctx.createLinearGradient(120, 0, 320, 0);
+    wpmTextGrad.addColorStop(0, "#ffffff");
+    wpmTextGrad.addColorStop(1, color2);
+    ctx.fillStyle = wpmTextGrad;
+    ctx.font = "700 96px system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(stats.wpm.toString(), 250, 195);
+    ctx.fillText(stats.wpm.toString(), 220, 205);
 
     ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-    ctx.font = "bold 12px system-ui, -apple-system, sans-serif";
-    ctx.fillText("WORDS PER MINUTE", 250, 225);
+    ctx.font = "600 10px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("WORDS PER MINUTE", 220, 235);
 
     // Accuracy
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 100px Courier New, Courier, monospace";
-    ctx.fillText(stats.accuracy.toString() + "%", 550, 195);
+    ctx.font = "700 96px system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif";
+    ctx.fillText(stats.accuracy.toString() + "%", 580, 205);
 
     ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-    ctx.font = "bold 12px system-ui, -apple-system, sans-serif";
-    ctx.fillText("ACCURACY", 550, 225);
+    ctx.font = "600 10px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("ACCURACY", 580, 235);
 
-    // 6. Horizontal separator
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    // 7. Divider Line
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(50, 260);
-    ctx.lineTo(750, 260);
+    ctx.moveTo(70, 265);
+    ctx.lineTo(730, 265);
     ctx.stroke();
 
-    // 7. Small stats row
-    ctx.textAlign = "left";
-    ctx.font = "12px system-ui, -apple-system, sans-serif";
+    // 8. Detailed watchOS-style widgets grid
+    const pills = [
+      { label: "TEST MODE", value: `${stats.mode} ${stats.modeDetail}`.toLowerCase() },
+      { label: "CONSISTENCY", value: `${stats.consistency}%` },
+      { label: "KEYSTROKES", value: `${stats.correctChars}/${stats.incorrectChars}/${stats.extraChars}/${stats.missedChars}` },
+      { label: "CORRECTED FIXES", value: stats.correctedErrors.toString() },
+    ];
 
-    // Stat 1: Mode
-    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.fillText("TEST MODE", 50, 300);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(`${stats.mode} ${stats.modeDetail}`, 50, 323);
+    const pY = 295;
+    const pWidth = 150;
+    const pHeight = 44;
+    const pRadius = 10;
 
-    // Stat 2: Consistency
-    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.fillText("CONSISTENCY", 240, 300);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(`${stats.consistency}%`, 240, 323);
+    pills.forEach((pill, index) => {
+      const pX = 70 + index * 170;
 
-    // Stat 3: Characters
-    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.fillText("CHARACTERS", 430, 300);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(
-      `${stats.correctChars}/${stats.incorrectChars}/${stats.extraChars}/${stats.missedChars}`,
-      430,
-      323
-    );
+      // Draw background widget
+      ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
+      drawRoundedRect(ctx, pX, pY, pWidth, pHeight, pRadius);
+      ctx.fill();
 
-    // Stat 4: Fixes
-    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.fillText("CORRECTED FIXES", 640, 300);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(stats.correctedErrors.toString(), 640, 323);
+      // Draw subtle widget border
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+      ctx.lineWidth = 1;
+      drawRoundedRect(ctx, pX, pY, pWidth, pHeight, pRadius);
+      ctx.stroke();
 
-    // Watermark link
-    ctx.textAlign = "right";
-    ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
-    ctx.font = "normal 12px system-ui, -apple-system, sans-serif";
-    ctx.fillText("typthm.niksoriginals.in", 750, 375);
+      // Draw widget label
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+      ctx.font = "600 8px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText(pill.label, pX + pWidth / 2, pY + 16);
+
+      // Draw widget value
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 12px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText(pill.value, pX + pWidth / 2, pY + 32);
+    });
 
     setImgSrc(canvas.toDataURL("image/png"));
   }, [stats]);
